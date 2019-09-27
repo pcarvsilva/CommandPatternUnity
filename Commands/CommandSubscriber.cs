@@ -6,17 +6,26 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(EventTrigger))]
 public class CommandSubscriber : MonoBehaviour {
 
-    public List<CommandSubscription> subscriptions;
+    public List<Command> subscriptions;
 
     private bool inside = false;
 
     // Use this for initialization
     void Awake() {
-	    foreach(CommandSubscription sub in subscriptions)
+	    foreach(Command sub in subscriptions)
         {
             sub.Subscribe(gameObject);
         }
 	}
+
+    public void SelectSelf(bool condition)
+    {
+        if (condition)
+        {
+            CommandController.instance.selectAgent(gameObject);
+        }
+    }
+
 
     void OnMouseEnter()
     {

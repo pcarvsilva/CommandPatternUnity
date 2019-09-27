@@ -7,18 +7,20 @@ using System;
 public class CommandController : MonoBehaviour {
 
     public static CommandController instance = null;
-    public List<CommandSubscription> commands = new List<CommandSubscription>();
+    public List<Command> commands = new List<Command>();
     [HideInInspector]
     public GameObject agent;
+
+    public GameObject startingAgent;
 
     public Coroutine runningCommand = null;
 
     public void clearAllCommands()
     {
-        commands = new List<CommandSubscription>();
+        commands = new List<Command>();
     }
 
-    public void Subscribe(CommandSubscription subscriber)
+    public void Subscribe(Command subscriber)
     {
         if (commands.Contains(subscriber)) return;
         int index = 0;
@@ -36,7 +38,7 @@ public class CommandController : MonoBehaviour {
         }
     }
 
-    public void Unsubscribe(CommandSubscription subscriber)
+    public void Unsubscribe(Command subscriber)
     {
         bool refreshAfter = false;
         if (commands.Count >0 && subscriber == commands[0])
@@ -64,7 +66,8 @@ public class CommandController : MonoBehaviour {
     void Start()
     {
         clearAllCommands();
-       // selectAgent(GameObject.FindWithTag("Player"));
+        if(startingAgent != null)
+            selectAgent(startingAgent);
     }
 
     public void selectAgent(GameObject selected)
@@ -77,25 +80,25 @@ public class CommandController : MonoBehaviour {
 
     void Update()
     {
+
         if (Input.GetMouseButtonDown(0) && commands.Count != 0 && runningCommand == null)
         {
             RaycastHit hit;
-            CommandSubscription subscription = commands[0];
-            ICommand command = subscription.command;
-            LayerMask layerMask = commands[0].layerMask;
+            Command command = commands[0];
+            LayerMask layerMask = command.layerMask;
 
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 100,layerMask) && EventSystem.current.IsPointerOverGameObject() == false)
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 100) &&
+                EventSystem.current.IsPointerOverGameObject() == false)
             {
                 if (hit.collider != null)
                 {
                     command.OnClick(agent, hit);
-                    if (subscription.unsubscribeOnClick)
+                    if (command.unsubscribeOnClick)
                     {
-                        Unsubscribe(subscription);
+                        Unsubscribe(command);
                     }
                 }
             }
-        }   
+        }
     }
-
 }
